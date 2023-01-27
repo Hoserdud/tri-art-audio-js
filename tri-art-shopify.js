@@ -278,9 +278,8 @@ function initializeProductDetails(productJSON) {
     let productObject = productJSON;
     // Create a new HTML element for the product title
     if (productObject.hasOwnProperty("title")) {
-        const title = document.createElement('h2');
+        const title = document.getElementById('productTitle');
         title.innerText = productObject.title;
-        container.appendChild(title);
     }
     // Create a new HTML element for the product 'img' is an available property
 
@@ -300,9 +299,8 @@ function initializeProductDetails(productJSON) {
 
     if (productObject.hasOwnProperty("price")) {
         // Create a new HTML element for the product price
-        const price = document.createElement('p');
+        const price = document.getElementById('productPrice');
         price.innerText = productObject.price;
-        container.appendChild(price);
     }
     // Append all the elements to the container
 

@@ -47,7 +47,7 @@ function changeActiveVariantButton(variantValues, productJSON) {
     //console.log(variantValues);
     //console.log(productJSON);
     var buttonContainer = document.getElementById('variantBlock');
-    var buttons = buttonContainer.getElementsByClassName('variantbutton');
+    var buttons = buttonContainer.getElementsByClassName('shopify-variant-button');
     let unavailableVariantValues = [];
     let activeVariantValues = [];
     //loop through the variants in the productJSON and make alist of variant values from unavailable variants  
@@ -72,7 +72,7 @@ function changeActiveVariantButton(variantValues, productJSON) {
             }
         }
     }
-    let activeButtons = document.querySelectorAll('.active.variantbutton');
+    let activeButtons = document.querySelectorAll('.active.shopify-variant-button');
     //console.log("unavailable variants:");
     //console.log(unavailableVariantValues); // Output: [1, 2, 3, 4, 5]
     //console.log("active variant buttons:");
@@ -153,7 +153,7 @@ function variantButtonPressed() {
     if (this.hasAttribute('variant')) {
         //console.log(this.getAttribute('variant'));
     }
-    let currentlyActiveButtons = document.querySelectorAll('.active.variantbutton');
+    let currentlyActiveButtons = document.querySelectorAll('.active.shopify-variant-button');
     let newActiveButtons = [];
     for (var i = 0; i < currentlyActiveButtons.length; i++) {
         if (currentlyActiveButtons[i].getAttribute('variantgroup') != this.getAttribute('variantgroup')) {
@@ -197,13 +197,15 @@ function generateVariantButtons(variantMatrix) {
     for (var i = 0; i < variantMatrix.length; i++) {
         //create a new div for each row of buttons
         var buttonRow = document.createElement('div');
-        buttonRow.setAttribute('id', 'vbcontainer');
+        buttonRow.setAttribute('class', 'vbcontainer');
         //loop through each array in the variantMatrix
         for (var j = 0; j < variantMatrix[i].length; j++) {
             //console.log(variantMatrix[i][j]);
             if (j == 0) {
                 //create a header with the name of the variant and append it to the variantBlock
-                var variantHeader = document.createElement('h1');
+                var variantHeader = document.createElement('h4');
+                //add a 15 pixel margin to the top of the new element
+                variantHeader.style.marginTop = '15px';
                 variantHeader.innerText = variantMatrix[i][j];
                 variantBlock.appendChild(variantHeader);
             }
@@ -244,23 +246,17 @@ async function getShopifyProduct(productIdString) {
     var newproductId = 'gid://shopify/Product/' + productIdString;
     //const productId = 'gid://shopify/Product/7544353128633';
     ////console.log(newproductId);
-    client.product.fetch(newproductId).then((product) => {
+    await client.product.fetch(newproductId).then((product) => {
+        console.log(product);
         initializeProductDetails(product);
-        const variants = product.variants;
-        variants.forEach(variant => {
-            client.product.fetch(variant.id).then((variant) => {
-                ////console.log(variant)
-                ////console.log(`Stock: ${variant.quantityAvailable}`);
-            });
-        });
-        //console.log(product);
+
         productData = product;
-        //console.log("This is the product data:");
+        console.log("This is the product data:");
         console.log(product);
         return (product);
     }).catch(function (err) {
-        ////console.log('error');
-        //console.log(err);
+        console.log('error');
+        console.log(err);
         return null;
     });
 }
@@ -290,11 +286,11 @@ function initializeProductDetails(productJSON) {
     //}
     //loop through the variants of a product and create html elements with their images
     for (var i = 0; i < productObject.variants.length; i++) {
-        const image = document.createElement('img');
+        let image = document.createElement('img');
         image.src = productObject.variants[i].image.src;
         image.setAttribute('variant-image', i);
         image.style.display = 'none';
-        container.appendChild(image);
+        document.getElementsByClassName('image-wrapper')[0].appendChild(image);
     }
 
     if (productObject.hasOwnProperty("price")) {
@@ -384,21 +380,27 @@ function initializeCart() {
     let obj = {};
     let jsonString = JSON.stringify(obj);
     let triartshoppingcart = Cookies.get("triartshoppingcart") || jsonString;
-    shoppingCartJSON = triartshoppingcart;
-    shoppingCartJSON = {
-        0: {
-            "productID": "gid://shopify/Product/7544358174905",
-            "variantID": 'gid://shopify/ProductVariant/43025696522425',
-            "quantity": 1,
-            "price": 100.67
-        },
-        1: {
-            "productID": "gid://shopify/Product/7544358174905",
-            "variantID": 'gid://shopify/ProductVariant/43025696555193',
-            "quantity": 3,
-            "price": 1010.99
-        }
-    };
+    shoppingCartJSON = JSON.parse(triartshoppingcart);
+    console.log("Shopping Cart JSON:");
+    console.log(shoppingCartJSON);
+    // shoppingCartJSON = {
+    //     0: {
+    //         "productID": "gid://shopify/Product/7544358174905",
+    //         "variantID": 'gid://shopify/ProductVariant/43025696522425',
+    //         "quantity": 1,
+    //         "price": 100.67
+    //     },
+    //     1: {
+    //         "productID": "gid://shopify/Product/7544358174905",
+    //         "variantID": 'gid://shopify/ProductVariant/43025696555193',
+    //         "quantity": 3,
+    //         "price": 1010.99
+    //     }
+    // };
+    //parse the triartshoppingcart json and set it to the shopping cart json
+
+    console.log("Shopping Cart JSON default:");
+    console.log(shoppingCartJSON);
     //get the inital cart object and add listeners to the quantity buttons
     let initialCartElement = document.getElementById("baseCartObject");
     //get all elements within the initialcartelement with the class quantitybutton
@@ -407,9 +409,8 @@ function initializeCart() {
     let checkoutButton = document.getElementById("checkout_button");
     checkoutButton.addEventListener('click', startCheckout);
     refreshCart();
-    let triartshoppingcartArray = JSON.parse(triartshoppingcart);
     //console.log("Original Shopping Cart: ", triartshoppingcartArray);// Output: Array [ "asfasf", "asfafsa", 
-    Cookies.set("triartshoppingcart", JSON.stringify(triartshoppingcartArray), { expires: 7 });
+    Cookies.set("triartshoppingcart", JSON.stringify(shoppingCartJSON), { expires: 7 });
 }
 function changeCartQuantity() {
     console.log("change cart quantity executed");
@@ -554,9 +555,108 @@ function startCheckout() {
     }
 }
 
-getProduct(productId).then(function (product) {
-    console.log(product);
-    console.log("get product executed")
-});
+getProduct(productId);
 initializeCart();
 
+const button_lookups_en = ["natural", "black", "graphite", "distressed", "natural + black", "black + natural"];
+const button_lookups_fr = ["natural", "black", "graphite", "distressed", "natural + black", "black + natural"];
+const button_image_urls = ["url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84c9042592c6048fd9_classic_finish.jpeg')", "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84f2f6415fb773618c_black_finish.jpeg')", "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84253c383c4696480a_grey_finish.jpeg')", "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84c3a3f94b27886dd4_distressed_finish.jpeg')", "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/627a945191983fa49cec57af_classic_black_finish.jpg')", "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/627a9451843a5809c239183e_black_classic_finish.jpg')"];
+
+
+var buttons = document.querySelectorAll('a[button="true"]');
+var variantImages = document.querySelectorAll('div[variantimage="true"]');
+var variantPrices = document.getElementsByClassName("price-collection-item");
+var relatedCarousel = document.getElementsByClassName("related-product-wrapper");
+var leftButton = document.getElementById('left-carousel-button');
+var rightButton = document.getElementById('right-carousel-button');
+var carouselItems = document.getElementsByClassName("related-product-item");
+var currentItem = 0;
+var itemOffset = 3;
+relatedCarousel = relatedCarousel.item(0);
+console.log(relatedCarousel.offsetWidth);
+rightButton.addEventListener("click", moveCarouselRight, false);
+leftButton.addEventListener("click", moveCarouselLeft, false);
+function calculateItemOffset() {
+    console.log($(window).width());
+    if ($(window).width() < 991) {
+        return (1);
+    }
+    return (3)
+}
+window.onresize = function (event) {
+    itemOffset = calculateItemOffset();
+    var maxDistance = carouselItems.length * carouselItems.item(0).offsetWidth;
+    var newPosition = parseInt((carouselItems.item(0).offsetWidth * currentItem), 10);
+    //console.log(newPosition);
+    relatedCarousel.style.right = `${newPosition - 1}px`
+};
+function moveCarouselRight(event) {
+    itemOffset = calculateItemOffset();
+    console.log(itemOffset)
+    if (currentItem < carouselItems.length - itemOffset) {
+        currentItem = currentItem + 1;
+        var maxDistance = carouselItems.length * carouselItems.item(0).offsetWidth;
+        var newPosition = parseInt((carouselItems.item(0).offsetWidth * currentItem), 10);
+        //console.log(newPosition);
+        relatedCarousel.style.right = `${newPosition - 1}px`
+    }
+}
+function moveCarouselLeft(event) {
+    if (currentItem > 0) {
+        currentItem = currentItem - 1;
+        var maxDistance = carouselItems.length * carouselItems.item(0).offsetWidth;
+        var newPosition = parseInt((carouselItems.item(0).offsetWidth * currentItem), 10);
+        //console.log(newPosition);
+        relatedCarousel.style.right = `${newPosition - 1}px`
+    }
+}
+
+for (let i = 0; i < variantImages.length; i++) {
+    variantImages.item(i).classList.remove("focused");
+    //console.log(variantImages.item(i).textContent.toLowerCase());
+}
+for (let i = 0; i < variantPrices.length; i++) {
+    variantPrices.item(i).style.display = "none";
+    var variantValue = variantPrices.item(i).getElementsByClassName("variant-name-text");
+    //console.log(variantValue.item(0).textContent.toLowerCase());
+    variantValue.item(0).style.display = "none";
+}
+for (let b = 0; b < buttons.length; b++) {
+    //console.log(buttons.item(b).textContent.toLowerCase());
+    for (let i = 0; i < button_lookups_en.length; i++) {
+        if (buttons.item(b).textContent.toLowerCase() == button_lookups_en[i]) {
+            //console.log("changed bg")
+            buttons.item(b).style.backgroundImage = button_image_urls[i];
+            buttons.item(b).style.width = "100px";
+            buttons.item(b).style.height = "100px";
+            buttons.item(b).style.borderRadius = "100px";
+            buttons.item(b).classList.remove("focused");
+            buttons.item(b).style.backgroundSize = "cover";
+        }
+    }
+    buttons.item(0).classList.add("focused");
+    variantImages.item(0).classList.add("focused");
+    variantPrices.item(0).style.display = "flex";
+    buttons.item(b).onclick = function (event) {
+        for (let i = 0; i < variantImages.length; i++) {
+            variantImages.item(i).classList.remove("focused");
+        }
+        var caller = event.target || event.srcElement;
+        for (let i = 0; i < buttons.length; i++) {
+            buttons.item(i).classList.remove("focused");
+            variantPrices.item(i).style.display = "none";
+        }
+        for (let img = 0; img < variantImages.length; img++) {
+            if (caller.textContent == variantImages.item(img).textContent) {
+                //console.log("-------");
+                //console.log(variantImages.item(img).textContent);
+                //console.log(caller.textContent);
+                variantImages.item(img).classList.add("focused");
+                variantPrices.item(img).style.display = "flex";
+                //console.log("-------");
+            }
+        }
+        caller.classList.add("focused");
+        //console.log(caller);
+    }
+}

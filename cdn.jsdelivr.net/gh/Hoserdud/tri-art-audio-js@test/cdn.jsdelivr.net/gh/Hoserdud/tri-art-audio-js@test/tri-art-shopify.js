@@ -7,7 +7,7 @@ var client = ShopifyBuy.buildClient({
     storefrontAccessToken: '0b822292e02fbb61e3651125956a1576'
 });
 var showPrice = true;
-var productId = '7544358174905';
+var productId = document.getElementById("shopifyItemCode").innerText
 var productData;
 var button = document.getElementById("cartToggle");
 var element = document.getElementById("cartContainer");
@@ -123,6 +123,25 @@ function changeActiveVariantButton(variantValues, productJSON) {
         if (matchingVariantValues == variantValues.length) {
             //console.log("changing active variant from: " + activeVariant + " to: " + i + "");
             activeVariant = i;
+            //change the price being displayed to the active variant price
+            //create a div with the class 'plan-price-2' and set the innerHTML to the active variant price plus a $ sign
+            //create a new element
+            var newElement = document.createElement('div');
+            //set the class of the new element to 'plan-price-2'
+            newElement.className = 'plan-price-2';
+            //set the innerHTML of the new element to the active variant price plus a $ sign
+            let priceString = productJSON.variants[i].price.amount;
+            priceString = parseFloat(priceString).toFixed(2);
+            //if the last three characters of the price string are .00, remove them 
+            if (priceString.slice(-3) == ".00") {
+                priceString = priceString.slice(0, -3);
+            }
+            newElement.innerHTML = "$" + priceString;
+            
+            //clear the element with the class 'product-price-wrapper'
+            document.getElementsByClassName('product-price-wrapper')[0].innerHTML = "";
+            //get the element with the class 'product-price-wrapper' and append the new element to it
+            document.getElementsByClassName('product-price-wrapper')[0].appendChild(newElement);
             //based on the new active variant value, set the ativeVariantAvailablility
             if (productJSON.variants[i].available) {
                 activeVariantAvailability = true;
@@ -238,6 +257,7 @@ function generateVariantButtons(variantMatrix) {
         variantBlock.appendChild(buttonRow);
     }
     //hide the baseVariantButton
+    styleButtons();
     document.getElementById('baseVariantButton').style.display = 'none';
 }
 async function getShopifyProduct(productIdString) {
@@ -416,6 +436,55 @@ function changeCartQuantity() {
     console.log("change cart quantity executed");
     console.log(this.getAttribute('quantity'));
     console.log(this.getAttribute('cartitem'));
+    let cartItemKey = this.getAttribute('cartitem')
+    //convert cartItemKey to an integer
+    cartItemKey = parseInt(cartItemKey);
+    if (this.getAttribute('quantity') == "increase") {
+        //increase the quantity of the cart item in the shopping cart json object
+        let quantityValueElements = document.getElementsByClassName('quantityvalue');
+        //loop through the quantity value elements and find the one with the corresponding cartitem attribute
+        for (var i = 0; i < quantityValueElements.length; i++) {
+            if (quantityValueElements[i].getAttribute('cartitem') == cartItemKey) {
+                //change the quantity value element to the quantity of the cart item
+                quantityValueElements[i].innerHTML = shoppingCartJSON[cartItemKey].quantity;
+            }
+        }
+
+        shoppingCartJSON[cartItemKey].quantity++;
+        cartTotalQuantity++;
+    }
+    if (this.getAttribute('quantity') == "decrease") {
+
+
+        //reduce the quantity of the item in the shopping cart json object
+        shoppingCartJSON[cartItemKey].quantity--;
+        cartTotalQuantity--;
+        //ffind the elemtns with the class quantityvalue
+        let quantityValueElements = document.getElementsByClassName('quantityvalue');
+        //loop through the quantity value elements and find the one with the corresponding cartitem attribute
+        for (var i = 0; i < quantityValueElements.length; i++) {
+            if (quantityValueElements[i].getAttribute('cartitem') == cartItemKey) {
+                //change the quantity value element to the quantity of the cart item
+                quantityValueElements[i].innerHTML = shoppingCartJSON[cartItemKey].quantity;
+            }
+        }
+
+        //set the quantity value element to the quantity of the cart ite
+        //if the quantity of the item is 0 then remove the item from the shopping cart json object
+        if (shoppingCartJSON[cartItemKey].quantity == 0) {
+            delete shoppingCartJSON[cartItemKey];
+            refreshCart();
+        }
+
+    }
+    if (this.getAttribute('quantity') == "remove") {
+        //reduce the cart quantity by the value of the quantity in the cart item
+        cartTotalQuantity = cartTotalQuantity - shoppingCartJSON[cartItemKey].quantity;
+        //remove the cart item from the shopping cart json object
+        delete shoppingCartJSON[cartItemKey];
+        refreshCart();
+
+    }
 }
 function showCartMessage(reason) {
     //show the removed from cart message
@@ -432,13 +501,19 @@ function showCartMessage(reason) {
     }
 }
 
-async function refreshCart() {
+async function refreshCart(item = -1) {
+    let values = Object.values(shoppingCartJSON);
+    let newShoppingCartJSON = {};
+    values.forEach((value, index) => {
+        newShoppingCartJSON[index] = value;
+    });
+    shoppingCartJSON = newShoppingCartJSON;
     cartrefresh = true;
     cartTotalPrice = 0;
     cartTotalQuantity = 0;
     let currentCartItem = {};
     let allCartItems = [];
-    let newShoppingCartJSON = {};
+    newShoppingCartJSON = {};
     let newShoppingCartJSONIndex = 0;
     for (let property in shoppingCartJSON) {
         await getCartItemObject(shoppingCartJSON[property]["productID"], shoppingCartJSON[property]["variantID"], shoppingCartJSON[property]["quantity"]).then((currentCartItem) => {
@@ -502,8 +577,16 @@ async function refreshCart() {
             variantString = variantString.substring(0, variantString.length - 2);
             newCartItem.getElementsByClassName("productcartimage")[0].src = allCartItems[cartItem]["variant"]["image"]["src"];
             newCartItem.getElementsByClassName("productcarttitle")[0].innerHTML = allCartItems[cartItem]["product"]["title"] + " - " + variantString;
-            newCartItem.getElementsByClassName("productcartprice")[0].innerHTML = allCartItems[cartItem]["variant"]["price"]["amount"];
+            let priceString = allCartItems[cartItem]["variant"]["price"]["amount"];
+            priceString = parseFloat(priceString).toFixed(2);
+            //remove the .00 from the end of the price string if it is exactly .00
+            if (priceString.substring(priceString.length - 3, priceString.length) == ".00") {
+                priceString = priceString.substring(0, priceString.length - 3);
+            }
+            newCartItem.getElementsByClassName("productcartprice")[0].innerHTML = "$" + priceString;
             newCartItem.getElementsByClassName("quantityvalue")[0].innerHTML = allCartItems[cartItem]["quantity"];
+            //give the quantity value an unique id for uptading the quantity
+            newCartItem.getElementsByClassName("quantityvalue")[0].setAttribute('cartitem', currentCartItemNumber);
             let quantityButtons = newCartItem.getElementsByClassName("quantitybutton");
             //loop through the classes and add event listeners
             for (var i = 0; i < quantityButtons.length; i++) {
@@ -527,6 +610,35 @@ function addToCart() {
     //if the calling button is the avalible button then add the product to the cart
     if (this.id == 'buyButtonAvailable') {
         console.log("add to cart executed");
+        //create the information for the cart
+        let cartItem = {};
+        //get the active variant find its json in the productData
+        let cartVariant = productData["variants"][activeVariant];
+        //get the product id
+        cartItem["productID"] = productData["id"];
+        //get the variant id
+        cartItem["variantID"] = cartVariant["id"];
+        //get the quantity
+        cartItem["quantity"] = 1;
+        //get the price
+        cartItem["price"] = cartVariant["price"]["amount"];
+        //check if the same object is already in the cart
+        let cartItemExists = false;
+        for (let property in shoppingCartJSON) {
+            if (shoppingCartJSON[property]["variant"] == cartItem["variant"]) {
+                //if the variant is already in the cart then increase the quantity
+                shoppingCartJSON[property]["quantity"]++;
+                cartItemExists = true;
+            }
+        }
+        //if the cart item does not exist then add it to the cart
+        if (!cartItemExists) {
+            shoppingCartJSON[100]=cartItem;
+        }
+        //update the cart
+        refreshCart();
+
+        
     }
     else {
         console.log("add to cart not executed");
@@ -555,8 +667,84 @@ function startCheckout() {
     }
 }
 
+
+const button_lookup_object = {
+    0: {
+        'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84c9042592c6048fd9_classic_finish.jpeg')",
+        "text": { 0: 'natural', 1: 'natural', 2: 'natural oiled' }
+    },
+    1: {
+        'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84f2f6415fb773618c_black_finish.jpeg')",
+        "text": { 0: 'black', 1: 'black' }
+    },
+    2: {
+        'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84253c383c4696480a_grey_finish.jpeg')",
+        "text": { 0: 'graphite', 1: 'graphite', 2: 'graphite oil rub' }
+    },
+    3: {
+        'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84c3a3f94b27886dd4_distressed_finish.jpeg')",
+        "text": { 0: 'distressed', 1: 'distressed', 2: 'distressed black' }
+    },
+    4: {
+        'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/627a945191983fa49cec57af_classic_black_finish.jpg')",
+        "text": { 0: 'natural + black', 1: 'natural + black' }
+    },
+    5: {
+        'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/627a9451843a5809c239183e_black_classic_finish.jpg')",
+        "text": { 0: 'black + natural', 1: 'black + natural' }
+    },
+
+
+};
+
+function styleButtons() {
+    //get all elements that have the class of either 'shopify-variant-button' or 'varianbutton'
+    var variantShopifyButtons = document.getElementsByClassName('shopify-variant-button');
+    var variantWebflowButtons = document.getElementsByClassName('variantbutton');
+    for (let buttonelem in variantShopifyButtons) {
+        changeButtonToStainButton(variantShopifyButtons[buttonelem]);
+    }
+    for (let buttonelem in variantWebflowButtons) {
+        changeButtonToStainButton(variantWebflowButtons[buttonelem]);
+    }
+}
+function changeButtonToStainButton(buttonElement) {
+    //check if the text content of the button matches any of the button lookups
+    var buttonText = buttonElement.textContent;
+
+    try {
+        buttonText = buttonText.toLowerCase();
+    }
+    catch {
+        console.log("error");
+        buttonText = "error";
+    }
+
+    //loop through each entry in the button lookup object and search for a match in the text key
+
+    for (let buttonLookup in button_lookup_object) {
+        for (let textLookup in button_lookup_object[buttonLookup]["text"]) {
+            if (buttonText == button_lookup_object[buttonLookup]["text"][textLookup]) {
+                //add an whitespace wrap to the button
+                buttonElement.style.whiteSpace = "normal";
+                //buttonElement.style.overflowWrap = "break-word";
+                //if the button index finds a match, get the image and set it as the bacground-image of the button
+                buttonElement.style.backgroundImage = button_lookup_object[buttonLookup]["image"];
+                buttonElement.style.backgroundSize = "cover";
+                buttonElement.style.backgroundPosition = "center";
+                buttonElement.style.width = "100px";
+                buttonElement.style.height = "100px";
+                buttonElement.style.borderRadius = "100px";
+            }
+        }
+    }
+}
+
+
 getProduct(productId);
 initializeCart();
+styleButtons();
+
 
 const button_lookups_en = ["natural", "black", "graphite", "distressed", "natural + black", "black + natural"];
 const button_lookups_fr = ["natural", "black", "graphite", "distressed", "natural + black", "black + natural"];
@@ -626,12 +814,8 @@ for (let b = 0; b < buttons.length; b++) {
     for (let i = 0; i < button_lookups_en.length; i++) {
         if (buttons.item(b).textContent.toLowerCase() == button_lookups_en[i]) {
             //console.log("changed bg")
-            buttons.item(b).style.backgroundImage = button_image_urls[i];
-            buttons.item(b).style.width = "100px";
-            buttons.item(b).style.height = "100px";
-            buttons.item(b).style.borderRadius = "100px";
+
             buttons.item(b).classList.remove("focused");
-            buttons.item(b).style.backgroundSize = "cover";
         }
     }
     buttons.item(0).classList.add("focused");

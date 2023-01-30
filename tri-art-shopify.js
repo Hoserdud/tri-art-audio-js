@@ -7,7 +7,12 @@ var client = ShopifyBuy.buildClient({
     storefrontAccessToken: '0b822292e02fbb61e3651125956a1576'
 });
 var showPrice = true;
-var productId = document.getElementById("shopifyItemCode").innerText
+try{
+    var productId = document.getElementById("shopifyItemCode").innerText;
+}
+catch{
+    var productId = '0';
+}
 var productData;
 var button = document.getElementById("cartToggle");
 var element = document.getElementById("cartContainer");

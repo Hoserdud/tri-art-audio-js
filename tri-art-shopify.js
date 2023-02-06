@@ -7,10 +7,10 @@ var client = ShopifyBuy.buildClient({
     storefrontAccessToken: '0b822292e02fbb61e3651125956a1576'
 });
 var showPrice = true;
-try{
+try {
     var productId = document.getElementById("shopifyItemCode").innerText;
 }
-catch{
+catch {
     var productId = '0';
 }
 var productData;
@@ -457,7 +457,7 @@ function changeCartQuantity() {
                 quantityValueElements[i].innerHTML = shoppingCartJSON[cartItemKey].quantity;
             }
         }
-        
+
         //cartTotalQuantity++;
     }
     if (this.getAttribute('quantity') == "decrease") {
@@ -615,14 +615,14 @@ async function refreshCart(item = -1) {
     Cookies.set("triartshoppingcart", JSON.stringify(shoppingCartJSON), { expires: 7 });
     baseCartObject.style.display = "none";
     console.log(shoppingCartJSON);
-    
+
 }
 function updateCartQuantity(cartItemNumber = 0, quantity = 0) {
     cartTotalQuantity += quantity;
-    try{
-    shoppingCartJSON[cartItemNumber]["quantity"]+= quantity;
-    //get the div with the id of cartNumber
-    }catch(err){
+    try {
+        shoppingCartJSON[cartItemNumber]["quantity"] += quantity;
+        //get the div with the id of cartNumber
+    } catch (err) {
         console.log(err);
     }
     let cartNumberElement = document.getElementById("cartNumber");
@@ -877,4 +877,22 @@ function initializeNonShopifyProduct() {
             //console.log(caller);
         }
     }
+}
+
+
+function initializeLottieBuyButton() {
+    const container = document.getElementById('buyButtonAnimation');
+    const animation = lottie.animationFromElement(container);
+
+    // Play the animation
+    //animation.play();
+
+    // Pause the animation
+    //animation.pause();
+
+    // Stop the animation
+    animation.stop();
+
+    // Change the animation speed
+    animation.setSpeed(2); // 2x faster
 }

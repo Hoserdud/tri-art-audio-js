@@ -889,38 +889,38 @@ function initializeNonShopifyProduct() {
 function initializeLottieBuyButton() {
 
     //fetch the lottie json and create the animation based on the container
-    fetch("https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/63dd682b172364b06f9997c8_shopping-cart-check-lottie.json").then(response => response.json()).then(data => {
-        console.log("melp-----------------------------------------------------------------------");
-        console.log(data);
-        //create a lottie animation with the data, and put it in the element with the id "buyButtonLottieAnimation"
-        var lottieanimation = lottie.loadAnimation({
-            container: document.getElementById('buyButtonLottieAnimation'),
-            renderer: 'svg',
-            loop: false,
-            autoplay: false,
-            animationData: data
-        });
-        //play the lottie animation
-        //lottieanimation.play();
-        //add an event listener to the button
-        
-        document.getElementById("buyButtonAvailable").addEventListener("click", function () {
-            console.log("clicked");
-            lottieanimation.setCurrentRawFrameValue(0);
-            lottieanimation.goToAndStop(0, true);
-            let buttonElement = document.getElementById("buyButtonAvailable");
-            let buttonAnimationBlock = document.getElementsByClassName("buy-button-animation-block")[0];
-            let buttonText = buttonAnimationBlock.firstElementChild;
-            let lottieBlock = document.getElementById("buyButtonLottieAnimation");
-            let animationOffset = buttonAnimationBlock.offsetHeight - lottieBlock.offsetHeight + (buttonText.offsetHeight / 1.5);
-            //set the buttonAnimationBlock's margin to the negative of the offset
-            buttonAnimationBlock.style.marginTop = `-${animationOffset}px`;
-            lottieanimation.play();
-            //add a listener to when the lottie animation finishes
-            lottieanimation.addEventListener("complete", function() {
-                buttonAnimationBlock.style.marginTop = '0px';
-            });
-        });
-    });
 
+    function initializeLottieBuyButton() {
+
+        fetch("https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/63dd682b172364b06f9997c8_shopping-cart-check-lottie.json").then(response => response.json()).then(data => {
+            console.log("melp-----------------------------------------------------------------------");
+            console.log(data);
+            var lottieanimation = lottie.loadAnimation({
+                container: document.getElementById('buyButtonLottieAnimation'),
+                renderer: 'svg',
+                loop: false,
+                autoplay: false,
+                animationData: data
+            });
+            
+            document.getElementById("buyButtonAvailable").addEventListener("click", function () {
+                console.log("clicked");
+                lottieanimation.setCurrentRawFrameValue(0);
+                lottieanimation.goToAndStop(0, true);
+                let buttonElement = document.getElementById("buyButtonAvailable");
+                let buttonAnimationBlock = document.getElementsByClassName("buy-button-animation-block")[0];
+                let buttonText = buttonAnimationBlock.firstElementChild;
+                let lottieBlock = document.getElementById("buyButtonLottieAnimation");
+                let animationOffset = buttonAnimationBlock.offsetHeight - lottieBlock.offsetHeight + (buttonText.offsetHeight / 1.5);
+                buttonAnimationBlock.style.marginTop = `-${animationOffset}px`;
+                lottieanimation.play();
+                lottieanimation.addEventListener("complete", function() {
+                    buttonAnimationBlock.style.marginTop = '0px';
+                });
+            });
+        }).catch(error => {
+            console.error("An error occurred while fetching the Lottie animation data:", error);
+        });
+    }
+    
 }

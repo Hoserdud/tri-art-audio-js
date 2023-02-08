@@ -729,7 +729,7 @@ function styleButtons() {
     var variantShopifyButtons = document.getElementsByClassName('shopify-variant-button');
     var variantWebflowButtons = document.getElementsByClassName('variantbutton');
     for (let buttonelem in variantShopifyButtons) {
-        changeButtonToStainButton(variantShopifyButtons[buttonelem]);
+        changeButtonToStainButtonShopify(variantShopifyButtons[buttonelem]);
     }
     for (let buttonelem in variantWebflowButtons) {
         changeButtonToStainButton(variantWebflowButtons[buttonelem]);
@@ -737,7 +737,7 @@ function styleButtons() {
 }
 function changeButtonToStainButton(buttonElement) {
     //check if the text content of the button matches any of the button lookups
-    var buttonText = buttonElement.textContent;
+    let buttonText = buttonElement.textContent;
 
     try {
         buttonText = buttonText.toLowerCase();
@@ -752,6 +752,8 @@ function changeButtonToStainButton(buttonElement) {
     for (let buttonLookup in button_lookup_object) {
         for (let textLookup in button_lookup_object[buttonLookup]["text"]) {
             if (buttonText == button_lookup_object[buttonLookup]["text"][textLookup]) {
+                //put the button in a div and create a variable with the text of the button
+                
                 //add an whitespace wrap to the button
                 buttonElement.style.whiteSpace = "normal";
                 //buttonElement.style.overflowWrap = "break-word";
@@ -759,14 +761,28 @@ function changeButtonToStainButton(buttonElement) {
                 buttonElement.style.backgroundImage = button_lookup_object[buttonLookup]["image"];
                 buttonElement.style.backgroundSize = "cover";
                 buttonElement.style.backgroundPosition = "center";
-                buttonElement.style.width = "100px";
-                buttonElement.style.height = "100px";
+                buttonElement.style.width = "15vw";
+                buttonElement.style.height = "15vw";
+                buttonElement.style.maxWidth = "100px";
+                buttonElement.style.maxHeight = "100px";
                 buttonElement.style.borderRadius = "100px";
+                let buttonDiv = document.createElement("div");
+                let parentElement = buttonElement.parentNode;
+                //put the button inside the div, and the div inside the buttons parent element
+                //parentElement.innerText = buttonText;
+                parentElement.appendChild(buttonDiv);
+                //buttonDiv.appendChild(buttonElement);
+                return true;
             }
         }
     }
+    return false;
 }
-
+function changeButtonToStainButtonShopify(buttonElement){
+    if(changeButtonToStainButton(buttonElement)){
+        buttonElement.innerText = "";
+    }
+}
 //check if the product ID string is not blank
 if (productId != "") {
     getProduct(productId);

@@ -696,6 +696,11 @@ function startCheckout() {
               
               client.checkout.addLineItems(checkoutId, lineItemsToAdd).then((checkout) => {
                 client.checkout.fetch(checkoutId).then((checkout) => {
+                    //clear the shopping cart
+                    shoppingCartJSON = {};
+                    //update the cart
+                    refreshCart();
+                    
                     // Redirect the user to the checkout URL
                     window.location.href = checkout.webUrl;
                   });

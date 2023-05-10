@@ -682,11 +682,31 @@ function startCheckout() {
             variantId: variantId,
             quantity: 1
         }];
-
-        const checkout = client.checkout.create({ lineItems });
-        const checkoutId = checkout.id;
-        console.log(checkoutId)
-        console.log(checkout)
+        client.checkout.create().then((checkout) => {
+            // Store the checkout ID for future use
+            checkoutId = checkout.id;
+            console.log(checkoutId)
+            const lineItemsToAdd = Object.keys(shoppingCartJSON).map((key) => {
+                const item = shoppingCartJSON[key];
+                return {
+                  variantId: item.variantID,
+                  quantity: item.quantity
+                };
+              });
+              
+              client.checkout.addLineItems(checkoutId, lineItemsToAdd).then((checkout) => {
+                client.checkout.fetch(checkoutId).then((checkout) => {
+                    // Redirect the user to the checkout URL
+                    window.location.href = checkout.webUrl;
+                  });
+                // Updated checkout with added line items
+              });
+              
+          });
+        //const checkout = client.checkout.create({ lineItems });
+        //const checkoutId = checkout.id;
+        
+        //console.log(checkout)
     } catch (error) {
         console.error(error);
         // Expected output: ReferenceError: nonExistentFunction is not defined

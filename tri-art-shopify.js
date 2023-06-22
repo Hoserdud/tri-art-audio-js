@@ -313,7 +313,8 @@ function initializeProductDetails(productJSON) {
     //loop through the variants of a product and create html elements with their images
     for (var i = 0; i < productObject.variants.length; i++) {
         let image = document.createElement('img');
-        image.src = productObject.variants[i].image.src;
+        let imageSource = productObject.variants[i].image.src + '?width=1000';
+        image.src = imageSource;
         image.setAttribute('variant-image', i);
         image.style.display = 'none';
         document.getElementsByClassName('image-wrapper')[0].appendChild(image);
@@ -409,21 +410,7 @@ function initializeCart() {
     shoppingCartJSON = JSON.parse(triartshoppingcart);
     console.log("Shopping Cart JSON:");
     console.log(shoppingCartJSON);
-    // shoppingCartJSON = {
-    //     0: {
-    //         "productID": "gid://shopify/Product/7544358174905",
-    //         "variantID": 'gid://shopify/ProductVariant/43025696522425',
-    //         "quantity": 1,
-    //         "price": 100.67
-    //     },
-    //     1: {
-    //         "productID": "gid://shopify/Product/7544358174905",
-    //         "variantID": 'gid://shopify/ProductVariant/43025696555193',
-    //         "quantity": 3,
-    //         "price": 1010.99
-    //     }
-    // };
-    //parse the triartshoppingcart json and set it to the shopping cart json
+
 
     console.log("Shopping Cart JSON default:");
     console.log(shoppingCartJSON);
@@ -719,35 +706,6 @@ function startCheckout() {
     }
 }
 
-
-// const button_lookup_object = {
-//     0: {
-//         'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84c9042592c6048fd9_classic_finish.jpeg')",
-//         "text": { 0: 'natural', 1: 'natural', 2: 'natural oiled' }
-//     },
-//     1: {
-//         'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84f2f6415fb773618c_black_finish.jpeg')",
-//         "text": { 0: 'black', 1: 'black' }
-//     },
-//     2: {
-//         'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84253c383c4696480a_grey_finish.jpeg')",
-//         "text": { 0: 'graphite', 1: 'graphite', 2: 'graphite oil rub' }
-//     },
-//     3: {
-//         'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/61e6ed84c3a3f94b27886dd4_distressed_finish.jpeg')",
-//         "text": { 0: 'distressed', 1: 'distressed', 2: 'distressed black' }
-//     },
-//     4: {
-//         'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/627a945191983fa49cec57af_classic_black_finish.jpg')",
-//         "text": { 0: 'natural + black', 1: 'natural + black' }
-//     },
-//     5: {
-//         'image': "url('https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/627a9451843a5809c239183e_black_classic_finish.jpg')",
-//         "text": { 0: 'black + natural', 1: 'black + natural' }
-//     },
-
-
-// };
 
 function styleButtons() {
     //get all elements that have the class of either 'shopify-variant-button' or 'varianbutton'

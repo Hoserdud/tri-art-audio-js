@@ -313,7 +313,7 @@ function initializeProductDetails(productJSON) {
     //loop through the variants of a product and create html elements with their images
     for (var i = 0; i < productObject.variants.length; i++) {
         let image = document.createElement('img');
-        let imageSource = productObject.variants[i].image.src + '?width=1000';
+        let imageSource = productObject.variants[i].image.src + '?width=500';
         image.src = imageSource;
         image.setAttribute('variant-image', i);
         image.style.display = 'none';

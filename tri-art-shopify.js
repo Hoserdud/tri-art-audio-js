@@ -200,6 +200,7 @@ function createPropertyMatrix(productJSON) {
         for (var i = 0; i < productJSON.options.length; i++) {
             //create a new array for each option
             var optionArray = [];
+            if (productJSON.options[i]['name'] != "Title"){
             optionArray.push(productJSON.options[i]['name']);
             //loop through every object in the 'values' key
             for (var j = 0; j < productJSON.options[i].values.length; j++) {
@@ -208,6 +209,7 @@ function createPropertyMatrix(productJSON) {
             }
             //push the optionArray into the variantMatrix
             variantMatrix.push(optionArray);
+            }
         }
         //console.log(variantMatrix);
     }
@@ -890,7 +892,10 @@ function initializeLottieBuyButton() {
     //fetch the lottie json and create the animation based on the container
 
     fetch("https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/63dd682b172364b06f9997c8_shopping-cart-check-lottie.json").then(response => response.json()).then(data => {
+        console.log('%c This is a blue text.', 'color: blue;');
         console.log("melp-----------------------------------------------------------------------");
+        console.log('%c Styled Text', 'background: yellow; color: black; font-size: 20px; padding: 4px;');
+
         console.log(data);
         var lottieanimation = lottie.loadAnimation({
             container: document.getElementById('buyButtonLottieAnimation'),

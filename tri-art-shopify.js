@@ -601,6 +601,12 @@ async function refreshCart(item = -1) {
             showCartMessage("out of stock");
         }
     }
+    if (allCartItems.length == 0) {
+        document.getElementById("cartToggle").style.display = "none";
+    }
+    else {
+        document.getElementById("cartToggle").style.display = "block";
+    }
     updateCartQuantity();
     Cookies.set("triartshoppingcart", JSON.stringify(shoppingCartJSON), { expires: 7 });
     baseCartObject.style.display = "none";

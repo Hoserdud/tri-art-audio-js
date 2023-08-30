@@ -30,18 +30,17 @@ button.addEventListener("click", function () {
 function getFirstActiveVariant(productJSON) {
     //loop through the variants and return the first variant with an available status of true
     for (var i = 0; i < productJSON.variants.length; i++) {
-        //if (productJSON.variants[i].available) {
+        if (productJSON.variants[i].available) {
             //console.log(productJSON.variants[i].title)
             let variantValues = [];
             //loop through the selectedOptions array and push the value of each object into the variantValues array
             for (var j = 0; j < productJSON.variants[i].selectedOptions.length; j++) {
                 variantValues.push(productJSON.variants[i].selectedOptions[j].value);
-                //console.log("Pushing variant", productJSON.variants[i].selectedOptions[j].value)
             }
             //console.log("the first active variant is: " + variantValues);
             activeVariant = i;
             return variantValues;
-        //}
+        }
     }
 }
 function setActiveImage(variantNumber, previousVariantNumber) {
@@ -71,7 +70,6 @@ function changeActiveVariantButton(variantValues, productJSON) {
     for (var i = 0; i < buttons.length; i++) {
         buttons[i].classList.remove('active');
         buttons[i].classList.remove('unavailable');
-        console.log("These are the variant values", variantValues)
         //loop through variantValues and check if the button's variant attribute is equal to the value in the variantValues array
         for (var j = 0; j < variantValues.length; j++) {
             if (buttons[i].getAttribute('variant') == variantValues[j]) {
@@ -277,7 +275,7 @@ async function getShopifyProduct(productIdString) {
     //const productId = 'gid://shopify/Product/7544353128633';
     ////console.log(newproductId);
     await client.product.fetch(newproductId).then((product) => {
-        console.log("This is the product", product);
+        console.log(product);
         initializeProductDetails(product);
 
         productData = product;
@@ -285,7 +283,7 @@ async function getShopifyProduct(productIdString) {
         console.log(product);
         return (product);
     }).catch(function (err) {
-        //console.log('error');
+        console.log('error');
         console.log(err);
         return null;
     });
@@ -295,16 +293,17 @@ async function getProduct(productIdString) {
         const product = await getShopifyProduct(productIdString);
         return product;
     } catch (err) {
-        console.log(err);
+        //console.log(err);
         return null;
     }
 }
 function initializeProductDetails(productJSON) {
     const container = document.getElementById('product-container');
+    let productObject = productJSON;
     // Create a new HTML element for the product title
-    if (productJSON.hasOwnProperty("title")) {
+    if (productObject.hasOwnProperty("title")) {
         const title = document.getElementById('productTitle');
-        title.innerText = productJSON.title;
+        title.innerText = productObject.title;
     }
     // Create a new HTML element for the product 'img' is an available property
 
@@ -314,30 +313,29 @@ function initializeProductDetails(productJSON) {
     //container.appendChild(image);
     //}
     //loop through the variants of a product and create html elements with their images
-    for (var i = 0; i < productJSON.variants.length; i++) {
+    for (var i = 0; i < productObject.variants.length; i++) {
         let image = document.createElement('img');
-        let imageSource = productJSON.variants[i].image.src + '?width=500';
+        let imageSource = productObject.variants[i].image.src + '?width=500';
         image.src = imageSource;
         image.setAttribute('variant-image', i);
         image.style.display = 'none';
         document.getElementsByClassName('image-wrapper')[0].appendChild(image);
     }
 
-    if (productJSON.hasOwnProperty("price")) {
+    if (productObject.hasOwnProperty("price")) {
         // Create a new HTML element for the product price
         const price = document.getElementById('productPrice');
-        price.innerText = productJSON.price;
+        price.innerText = productObject.price;
     }
     // Append all the elements to the container
 
 
 
 
-    createPropertyMatrix(productJSON);
+    createPropertyMatrix(productObject);
     generateVariantButtons(variantMatrix);
-    let variantTags = getFirstActiveVariant(productJSON);
-    console.log("These are the Variant Tag and Product Objects", variantTags, productJSON)
-    changeActiveVariantButton(variantTags, productJSON);
+    let variantTags = getFirstActiveVariant(productObject);
+    changeActiveVariantButton(variantTags, productObject);
     initializeBuyButtons();
     setBuyButtonVisibility();
 }
@@ -390,8 +388,8 @@ async function getCartItemObject(productID, variantID, quantity) {
         for (var i = 0; i < product.variants.length; i++) {
             if (product.variants[i].id == variantID) {
                 //add the variant to the cart
-                //console.log("Cart Item Variant:");
-                //console.log(product.variants[i]);
+                console.log("Cart Item Variant:");
+                console.log(product.variants[i]);
                 //return product.variants[i]
                 returnObject["product"] = product;
                 returnObject["variant"] = product.variants[i];
@@ -412,12 +410,12 @@ function initializeCart() {
     let jsonString = JSON.stringify(obj);
     let triartshoppingcart = Cookies.get("triartshoppingcart") || jsonString;
     shoppingCartJSON = JSON.parse(triartshoppingcart);
-    //console.log("Shopping Cart JSON:");
-    //console.log(shoppingCartJSON);
+    console.log("Shopping Cart JSON:");
+    console.log(shoppingCartJSON);
 
 
-    //console.log("Shopping Cart JSON default:");
-    //console.log(shoppingCartJSON);
+    console.log("Shopping Cart JSON default:");
+    console.log(shoppingCartJSON);
     //get the inital cart object and add listeners to the quantity buttons
     let initialCartElement = document.getElementById("baseCartObject");
     //get all elements within the initialcartelement with the class quantitybutton
@@ -430,9 +428,9 @@ function initializeCart() {
     Cookies.set("triartshoppingcart", JSON.stringify(shoppingCartJSON), { expires: 7 });
 }
 function changeCartQuantity() {
-    //console.log("change cart quantity executed");
-    //console.log(this.getAttribute('quantity'));
-    //console.log(this.getAttribute('cartitem'));
+    console.log("change cart quantity executed");
+    console.log(this.getAttribute('quantity'));
+    console.log(this.getAttribute('cartitem'));
     let cartItemKey = this.getAttribute('cartitem')
     //convert cartItemKey to an integer
     cartItemKey = parseInt(cartItemKey);
@@ -520,7 +518,7 @@ async function refreshCart(item = -1) {
         await getCartItemObject(shoppingCartJSON[property]["productID"], shoppingCartJSON[property]["variantID"], shoppingCartJSON[property]["quantity"]).then((currentCartItem) => {
             //currentCartItem = await ;
             //add the quantity to the cart total quantity
-            //console.log(currentCartItem);
+            console.log(currentCartItem);
             if (currentCartItem["variant"]['available'] == true) {
                 let newItemObject = {};
                 newItemObject["product"] = currentCartItem["product"]["id"];
@@ -551,20 +549,20 @@ async function refreshCart(item = -1) {
             }
         });
     }
-   // console.log("Cart Total Price: ", cartTotalPrice);
-    //console.log("Cart Total Quantity: ", cartTotalQuantity);
-    //console.log("All Cart Items: ", allCartItems);
+    console.log("Cart Total Price: ", cartTotalPrice);
+    console.log("Cart Total Quantity: ", cartTotalQuantity);
+    console.log("All Cart Items: ", allCartItems);
     let cartItemContainerElement = document.getElementById("cartItems");
     let baseCartObject = document.getElementById("baseCartObject");
     //make the base cart object display flex
     baseCartObject.style.display = "flex";
-    //console.log(baseCartObject);
-    //console.log(cartItemContainerElement);
+    console.log(baseCartObject);
+    console.log(cartItemContainerElement);
     cartItemContainerElement.innerHTML = "";
     let currentCartItemNumber = 0;
     for (let cartItem in allCartItems) {
         console.log("-----------------------------------------------------------------------------------------------------");
-        //console.log(allCartItems[cartItem]);
+        console.log(allCartItems[cartItem]);
         console.log(allCartItems[cartItem]['variant']['available']);
         if (allCartItems[cartItem]['variant']['available']) {
             let newCartItem = baseCartObject.cloneNode(true);
@@ -612,7 +610,7 @@ async function refreshCart(item = -1) {
     updateCartQuantity();
     Cookies.set("triartshoppingcart", JSON.stringify(shoppingCartJSON), { expires: 7 });
     baseCartObject.style.display = "none";
-    console.log("this is the shopping cart json", shoppingCartJSON);
+    console.log(shoppingCartJSON);
 
 }
 function updateCartQuantity(cartItemNumber = 0, quantity = 0) {
@@ -682,7 +680,7 @@ function startCheckout() {
         client.checkout.create().then((checkout) => {
             // Store the checkout ID for future use
             checkoutId = checkout.id;
-            console.log("this is the checkout id", checkoutId)
+            console.log(checkoutId)
             const lineItemsToAdd = Object.keys(shoppingCartJSON).map((key) => {
                 const item = shoppingCartJSON[key];
                 return {
@@ -736,7 +734,7 @@ function changeButtonToStainButton(buttonElement) {
         buttonText = buttonText.toLowerCase();
     }
     catch {
-        console.log("error changing button to stain");
+        console.log("error");
         buttonText = "error";
     }
 
@@ -800,7 +798,7 @@ var carouselItems = document.getElementsByClassName("related-product-item");
 var currentItem = 0;
 var itemOffset = 3;
 relatedCarousel = relatedCarousel.item(0);
-//console.log(relatedCarousel.offsetWidth);
+console.log(relatedCarousel.offsetWidth);
 rightButton.addEventListener("click", moveCarouselRight, false);
 leftButton.addEventListener("click", moveCarouselLeft, false);
 function calculateItemOffset() {
@@ -900,11 +898,11 @@ function initializeLottieBuyButton() {
     //fetch the lottie json and create the animation based on the container
 
     fetch("https://uploads-ssl.webflow.com/61bcf133fac47a1111712223/63dd682b172364b06f9997c8_shopping-cart-check-lottie.json").then(response => response.json()).then(data => {
-        //console.log('%c This is a blue text.', 'color: blue;');
-        //console.log("melp-----------------------------------------------------------------------");
-        //console.log('%c Styled Text', 'background: yellow; color: black; font-size: 20px; padding: 4px;');
+        console.log('%c This is a blue text.', 'color: blue;');
+        console.log("melp-----------------------------------------------------------------------");
+        console.log('%c Styled Text', 'background: yellow; color: black; font-size: 20px; padding: 4px;');
 
-        //console.log(data);
+        console.log(data);
         var lottieanimation = lottie.loadAnimation({
             container: document.getElementById('buyButtonLottieAnimation'),
             renderer: 'svg',
@@ -929,6 +927,6 @@ function initializeLottieBuyButton() {
             });
         });
     }).catch(error => {
-        //console.error("An error occurred while fetching the Lottie animation data:", error);
+        console.error("An error occurred while fetching the Lottie animation data:", error);
     });
 }

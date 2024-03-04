@@ -925,7 +925,7 @@ function initializeLottieBuyButton() {
             buttonAnimationBlock.style.marginTop = `-${animationOffset}px`;
             lottieanimation.play();
             lottieanimation.addEventListener("complete", function () {
-                buttonAnimationBlock.style.marginTop = '0px';
+                buttonAnimationBlock.style.marginTop = '5px';
             });
         });
     }).catch(error => {
